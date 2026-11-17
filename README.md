@@ -5,6 +5,11 @@ your own Ordibot around a reef plaza, see the other holders' bots move in real t
 game server: the engine is a single self-contained HTML file that runs inside ord's iframe sandbox and CSP, and every
 player checks every other player for themselves.
 
+**Try it: [app.ordstudio.app/d/FgIEom9R7QUQ](https://app.ordstudio.app/d/FgIEom9R7QUQ)**. You need desktop Chrome or
+Edge with the [Xverse](https://www.xverse.app/) extension and a wallet that holds an Ordibot. Open the link in its own
+tab, connect Xverse, pick your bot and sign one message (no transaction, no fee). Chat is public on
+[entmoot.xyz](https://entmoot.xyz/explore/WjpgsLgYxLqZ3SoYhULexDJIYttXddbzfFX7l0XQ1lY=).
+
 - **Rendering:** WebGPU. The bots are assembled from their on-chain trait models (`/content/<asset id>`) exactly like
   the collection's renderer: glTF, PBR, shadows, bloom. Browsers without WebGPU get a 2D view.
 - **Login:** `login.html` connects Xverse, lists the Ordibots the wallet holds and asks for **one BIP-322 message
