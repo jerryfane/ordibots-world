@@ -1,0 +1,106 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ordibots-world net live test</title>
+<style>body{margin:0;background:#061a26;color:#bfe;font:13px/1.35 monospace}pre{margin:8px;white-space:pre-wrap}</style>
+<pre id="out">starting…</pre>
+<script type="module">
+// Live test page for net.js: runs as an inscription runs (ordstudio sandbox = ord's iframe sandbox + CSP).
+// URL hash: #k=<seed b64url>&i=<invite JSON b64url>&b=<bot>&t=<traits>&r=<perMin,burst>&nat=blocked&g=<group id>
+// nat=blocked simulates a network where no ICE path works (relay-only policy with no TURN server): P2P fails.
+// Drivers (live/run.mjs, or a person's browser console) call window.T.* and read window.T.stats().
+// ordstudio serves project files as /content/local:<path>; net.js imports './entmoot-lite.js', so both are
+// loaded as blob: modules (as an inscription that inlines them would).
+const h = Object.fromEntries(new URLSearchParams(location.hash.slice(1)))
+try { history.replaceState(null, '', location.pathname + location.search) } catch {}
+const now = () => performance.timeOrigin + performance.now()
+const src = async (p) => (await fetch('./local:' + p)).text()
+const blob = (s) => URL.createObjectURL(new Blob([s], { type: 'text/javascript' }))
+// lite=<file>: load another entmoot-lite build from the project (e.g. one with timing marks: it calls
+// globalThis.__elMark(event, data), collected in T.marks)
+const marks = []
+globalThis.__elMark = (ev, d) => { if (marks.length < 2000) marks.push({ ev, at: now(), ...d }) }
+const lite = blob(await src(/^[\w.-]+\.js$/.test(h.lite || '') ? h.lite : 'entmoot-lite.js'))
+const { createNet } = await import(blob((await src('net.js')).replace("'./entmoot-lite.js'", JSON.stringify(lite))))
+
+const ADDR = '/ip4/37.27.59.89/udp/47004/webrtc-direct/certhash/uEiBv9RXMG4IqYvd6V0VmzD0unlVj1kLGKK0o-arWW0LLJA/p2p/12D3KooWCWu85kXSt5ivWTeE4xLo1jvCwBs9g5DNhHZDsjXNaaR5'
+// g=<base64 group id>: the group to join (required)
+const GROUP = /^[A-Za-z0-9+/]{43}=$/.test(h.g || '') ? h.g : null
+if (!GROUP) throw Error('#g=<base64 group id> required')
+const unb64url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))
+const out = document.getElementById('out')
+const log = []
+const say = (...a) => { log.push(new Date().toISOString().slice(11, 23) + ' ' + a.join(' ')); if (log.length > 200) log.shift() }
+const errors = []
+
+const T = window.T = { log, errors, marks, chats: [], peerEvents: [], leaves: [], recv: {}, phase: 'joining' }
+const pct = (a, q) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return Math.round(s[Math.min(s.length - 1, Math.floor(q * s.length))] * 10) / 10 }
+
+try {
+  if (!h.k) throw Error('no key in hash')
+  const invite = h.i ? JSON.parse(new TextDecoder().decode(unb64url(h.i))) : undefined
+  const [perMin, burst] = (h.r || '6,12').split(',').map(Number)
+  const t0 = now()
+  const net = await createNet({
+    addr: invite?.allowed_multiaddrs?.[0] || ADDR, groupId: GROUP, key: unb64url(h.k), invite,
+    me: { bot: Number(h.b), t: h.t || undefined }, rate: { perMin, burst },
+    rtc: h.nat === 'blocked' ? class extends RTCPeerConnection { constructor (c) { super({ ...c, iceTransportPolicy: 'relay' }) } } : undefined,
+    onerror: (e) => { errors.push(String(e?.message || e)); say('onerror', e?.message || e) }
+  })
+  T.joinMs = Math.round(now() - t0)
+  T.net = net
+  T.phase = 'joined'
+  say('joined as', net.me.name, net.me.id.slice(0, 8), 'in', T.joinMs, 'ms')
+  net.on('peer', (p) => { T.peerEvents.push({ id: p.id, bot: p.bot, t: p.t, name: p.name, at: now() }); say('peer', p.name, p.id.slice(0, 8)) })
+  net.on('leave', (id) => { T.leaves.push(id); say('leave', id.slice(0, 8)) })
+  net.on('chat', (c) => { T.chats.push(c); say('chat', c.history ? '(history)' : '', c.name, JSON.stringify(c.text)) })
+  net.on('state', (s) => {
+    const r = T.recv[s.from] ||= { n: 0, lat: [], at: [] }
+    const t = now()
+    r.n++; r.at.push(t); r.lat.push(t - s.t); r.last = s
+    if (r.at.length > 2000) { r.at.shift(); r.lat.shift() }
+  })
+
+  let mover = 0; let sent = 0
+  /** call sendState at `hz` (the caller rate; net caps at 15 Hz) for `sec` seconds; t = sender's epoch ms */
+  T.move = (hz = 60, sec = 10) => new Promise((resolve) => {
+    clearInterval(mover); sent = 0
+    const end = now() + sec * 1000
+    mover = setInterval(() => {
+      const t = now()
+      if (t > end) { clearInterval(mover); return resolve(sent) }
+      const a = t / 1000
+      net.sendState({ t, x: Math.cos(a) * 4, y: 0, z: Math.sin(a) * 4, yaw: a, anim: 'walk' }); sent++
+    }, 1000 / hz)
+  })
+  T.chat = (text) => net.chat(text).then((id) => ({ id }), (e) => ({ error: e.message, code: e.code }))
+  T.resetRecv = () => { T.recv = {} }
+  /** received-state stats per peer over the last `sec` seconds */
+  T.stats = (sec = 10) => {
+    const t = now()
+    const recv = {}
+    for (const [id, r] of Object.entries(T.recv)) {
+      const k = r.at.findIndex((x) => x >= t - sec * 1000)
+      const at = k < 0 ? [] : r.at.slice(k); const lat = k < 0 ? [] : r.lat.slice(k)
+      const span = at.length > 1 ? (at.at(-1) - at[0]) / 1000 : 0
+      recv[id.slice(0, 8)] = { n: r.n, window: at.length, hz: span ? Math.round((at.length - 1) / span * 10) / 10 : 0, latP50: pct(lat, 0.5), latP95: pct(lat, 0.95), latMax: pct(lat, 1) }
+    }
+    return {
+      me: { id: net.me.id, bot: net.me.bot, name: net.me.name },
+      joinMs: T.joinMs,
+      peers: [...net.peers.values()].map((p) => ({ id: p.id.slice(0, 8), bot: p.bot, t: p.t, name: p.name, p2p: p.p2p, route: p.route, rtt: p.rtt, why: p.why, ageS: Math.round((Date.now() - p.lastSeen) / 1000) })),
+      chats: T.chats.map((c) => ({ from: c.from.slice(0, 8), text: c.text, history: !!c.history })),
+      recv,
+      errors
+    }
+  }
+  T.close = () => net.close()
+} catch (e) {
+  T.phase = 'failed'
+  errors.push(String(e?.stack || e))
+  say('FAILED', e?.message || e)
+}
+setInterval(() => {
+  const s = T.stats ? JSON.stringify(T.stats(5), null, 1) : ''
+  out.textContent = `phase: ${T.phase}\n${s}\n--- log ---\n${log.slice(-25).join('\n')}`
+}, 1000)
+</script>

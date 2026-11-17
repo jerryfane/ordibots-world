@@ -1,0 +1,15 @@
+node_modules/
+# local secrets and test material: never committed
+keys/
+world/config/test-invite.json
+login/test/*.json
+seat-*.txt
+*.log
+# local outputs
+dist/
+dist-*/
+!dist-public/
+assets/
+net/live/results/
+login/live/shots/
+world/shots/

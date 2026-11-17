@@ -1,0 +1,9 @@
+{
+  "name": "ordibots-world-net",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "live": "node live/run.mjs"
+  }
+}

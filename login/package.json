@@ -1,0 +1,14 @@
+{
+  "name": "ordibots-world-login",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0",
+    "@scure/base": "^2.4.0",
+    "bip322-js": "^4.0.1"
+  }
+}

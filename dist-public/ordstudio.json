@@ -1,0 +1,35 @@
+{
+  "ordstudio": 1,
+  "files": {
+    "world.html": {
+      "id": null,
+      "role": "parent",
+      "as": "world",
+      "compress": "br"
+    },
+    "bot-1571.html": {
+      "id": null,
+      "role": "child",
+      "parent": "world.html",
+      "as": "bot-1571"
+    },
+    "bot-0375.html": {
+      "id": null,
+      "role": "child",
+      "parent": "world.html",
+      "as": "bot-0375"
+    },
+    "bot-1170.html": {
+      "id": null,
+      "role": "child",
+      "parent": "world.html",
+      "as": "bot-1170"
+    },
+    "bot-0002.html": {
+      "id": null,
+      "role": "child",
+      "parent": "world.html",
+      "as": "bot-0002"
+    }
+  }
+}

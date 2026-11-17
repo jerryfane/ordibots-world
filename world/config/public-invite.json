@@ -1,0 +1,54 @@
+{
+  "group_id": "WjpgsLgYxLqZ3SoYhULexDJIYttXddbzfFX7l0XQ1lY=",
+  "target_member_id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+  "founder": {
+    "entmoot_pubkey": "KBmbK9EWWGfi2U/mJMZq+lxTvETqawmIILap8/tfoNA=",
+    "member_id": "MparPSGHFv23IGeDtf3Ng8kq7AuzGQ3fYEHBkrFSDRA=",
+    "peer_id": "12D3KooWCWu85kXSt5ivWTeE4xLo1jvCwBs9g5DNhHZDsjXNaaR5"
+  },
+  "roster_head": "KyS7S9sQeSW+wAivsF46g1tTLgPRJlPXeeZ7loi4RVI=",
+  "allowed_peer_ids": [
+    "12D3KooWCWu85kXSt5ivWTeE4xLo1jvCwBs9g5DNhHZDsjXNaaR5"
+  ],
+  "allowed_multiaddrs": [
+    "/ip4/37.27.59.89/udp/47004/webrtc-direct/certhash/uEiBv9RXMG4IqYvd6V0VmzD0unlVj1kLGKK0o-arWW0LLJA/p2p/12D3KooWCWu85kXSt5ivWTeE4xLo1jvCwBs9g5DNhHZDsjXNaaR5"
+  ],
+  "max_uses": 64,
+  "nonce": [
+    61,
+    58,
+    81,
+    114,
+    47,
+    33,
+    47,
+    7,
+    157,
+    115,
+    144,
+    184,
+    139,
+    90,
+    198,
+    239,
+    183,
+    49,
+    18,
+    113,
+    215,
+    41,
+    65,
+    234,
+    52,
+    38,
+    13,
+    80,
+    132,
+    216,
+    57,
+    150
+  ],
+  "issued_at_ms": 1794934726321,
+  "expires_at_ms": 1826471026321,
+  "signature": "CGuJ5sa4LG6FGD11VSaxpWGXz0zfvuH6g0TDT0NPPDyD3wHi+n/ELysmiDwJiroPaK5k5sQR1rFwrc3ouWyCDA=="
+}

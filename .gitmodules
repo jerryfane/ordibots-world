@@ -1,0 +1,3 @@
+[submodule "vendor/entmoot-lite"]
+	path = vendor/entmoot-lite
+	url = https://github.com/jerryfane/entmoot-lite

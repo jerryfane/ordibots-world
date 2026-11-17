@@ -1,0 +1,7 @@
+{
+  "name": "Ordibots test world (private test group)",
+  "group": "/Wf9NvLIhgB8KDu3pb4XAO+dIHXLlCrtQjBBIvRwfwg=",
+  "addr": "/ip4/37.27.59.89/udp/47004/webrtc-direct/certhash/uEiBv9RXMG4IqYvd6V0VmzD0unlVj1kLGKK0o-arWW0LLJA/p2p/12D3KooWCWu85kXSt5ivWTeE4xLo1jvCwBs9g5DNhHZDsjXNaaR5",
+  "invite": "test-invite.json",
+  "dist": "../../dist/"
+}
